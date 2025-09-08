@@ -7,7 +7,7 @@
 vs_mram(y_data, x_data)
 }
 \arguments{
-\item{y_data}{A \eqn{n \times d} matrix of responses.}
+\item{y_data}{A \eqn{n \times d} matrix of responses, where \eqn{n} is the sample size.}
 
 \item{x_data}{A \eqn{n \times p} matrix of predictors.}
 }
@@ -15,21 +15,51 @@ vs_mram(y_data, x_data)
 The vector containing the indices of the selected predictors in the order they were chosen.
 }
 \description{
-Perform variable selection via the multivariate regression association measure proposed in Shih and Chen (2025).
+Select a subset of \eqn{\bf X} which can be used to predict \eqn{\bf Y} based on \eqn{T_n}.
 }
 \details{
-\code{vs_mram} is a forward and stepwise variable selection algorithm which utilizes the multivariate regression association measure proposed in Shih and Chen (2025). The Algorithm is modified from the feature ordering by conditional independence (FOCI) algorithm from Azadkia and Chatterjee (2021).
+\code{vs_mram} performs forward stepwise variable selection based on the multivariate regression association measure proposed in Shih and Chen (2025). At each step, it selects the predictor with the highest conditional predictability for the response given the previously selected predictors. The algorithm is modified from the FOCI algorithm from Azadkia and Chatterjee (2021).
 }
 \examples{
+library(MRAM)
+
 n = 200
 p = 10
 
+set.seed(1)
 x_data = matrix(rnorm(p*n),n,p)
-y_data = x_data[,1]*x_data[,2]+x_data[,1]-x_data[,3]+rnorm(n)
 colnames(x_data) = paste0(rep("X",p),seq(1,p))
 
-library(MRAM)
-mram_res = vs_mram(y_data,x_data)
+y_data = x_data[,1]*x_data[,2]+x_data[,1]-x_data[,3]+rnorm(n)
+colnames(x_data)[vs_mram(y_data,x_data)] # selected variables
+
+\dontrun{
+
+n = 500
+p = 10
+
+set.seed(1)
+x_data = matrix(rnorm(p*n),n,p)
+colnames(x_data) = paste0(rep("X",p),seq(1,p))
+
+# Linear
+y_data = matrix(0,n,2)
+y_data[,1] = x_data[,1]*x_data[,2]+x_data[,1]-x_data[,3]+rnorm(n)
+y_data[,2] = x_data[,2]*x_data[,4]+x_data[,2]-x_data[,5]+rnorm(n)
+colnames(x_data)[vs_mram(y_data,x_data)] # selected variables
+
+# Nonlinear
+y_data = matrix(0,n,2)
+y_data[,1] = x_data[,1]*x_data[,2]+sin(x_data[,1]*x_data[,3])+0.3*rnorm(n)
+y_data[,2] = cos(x_data[,2]*x_data[,4])+x_data[,3]-x_data[,4]+0.3*rnorm(n)
+colnames(x_data)[vs_mram(y_data,x_data)] # selected variables
+
+# Non-additive error
+y_data = matrix(0,n,2)
+y_data[,1] = abs(x_data[,1]+runif(n))^(sin(x_data[,2])-cos(x_data[,3]))
+y_data[,2] = abs(x_data[,2]-runif(n))^(sin(x_data[,3])-cos(x_data[,4]))
+colnames(x_data)[vs_mram(y_data,x_data)] # selected variables
+}
 }
 \references{
 Azadkia and Chatterjee (2021) A simple measure of conditional dependence, Annals of Statistics, 46(6): 3070-3102.
