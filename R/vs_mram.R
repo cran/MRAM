@@ -8,7 +8,7 @@
 #' @return The vector containing the indices of the selected predictors in the order they were chosen.
 #'
 #' @references Azadkia and Chatterjee (2021) A simple measure of conditional dependence, Annals of Statistics, 46(6): 3070-3102.
-#' @references Shih and Chen (2025) Measuring multivariate regression association via spatial sign (in revision, Computational Statistics & Data Analysis)
+#' @references Shih and Chen (2026) Measuring multivariate regression association via spatial sign, Computational Statistics & Data Analysis, 215, 108288.
 #' @seealso \code{\link{mram}}
 #'
 #' @export
@@ -57,15 +57,8 @@
 vs_mram = function(y_data,
                    x_data) {
 
-  if (is.matrix(y_data)) {
-
-    n = dim(y_data)[1]
-
-  } else {
-
-    n = length(y_data)
-
-  }
+  y_data = as.matrix(y_data)
+  x_data = as.matrix(x_data)
 
   p = dim(x_data)[2]
   p_seq = c(1:p)

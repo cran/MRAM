@@ -64,7 +64,7 @@ colnames(x_data)[vs_mram(y_data,x_data)] # selected variables
 \references{
 Azadkia and Chatterjee (2021) A simple measure of conditional dependence, Annals of Statistics, 46(6): 3070-3102.
 
-Shih and Chen (2025) Measuring multivariate regression association via spatial sign (in revision, Computational Statistics & Data Analysis)
+Shih and Chen (2026) Measuring multivariate regression association via spatial sign, Computational Statistics & Data Analysis, 215, 108288.
 }
 \seealso{
 \code{\link{mram}}

@@ -28,7 +28,7 @@
 #' \item{J_cluster}{The index of the best \code{m_vec} chosen by the cluster rule.}
 #'
 #' @references Dette and Kroll (2024) A Simple Bootstrap for Chatterjee’s Rank Correlation, Biometrika, asae045.
-#' @references Shih and Chen (2025) Measuring multivariate regression association via spatial sign (in revision, Computational Statistics & Data Analysis)
+#' @references Shih and Chen (2026) Measuring multivariate regression association via spatial sign, Computational Statistics & Data Analysis, 215, 108288.
 #' @seealso \code{\link{vs_mram}}
 #'
 #' @importFrom stats ks.test sd
@@ -61,44 +61,16 @@
 #' mram(y_data,x_data[,2],bootstrap = TRUE)
 #' }
 
-mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = seq(0.4,0.9,by = 0.05)) {
+mram = function(y_data,
+                x_data,
+                z_data = NULL,
+                bootstrap = FALSE,
+                B = 1000,
+                g_vec = seq(0.4,0.9,by = 0.05)) {
 
-  get_index = function(x,b) {
+  y_data = as.matrix(y_data)
 
-    if (is.matrix(x)) {
-
-      return(x[b,,drop = FALSE])
-
-    } else {
-
-      return(x[b])
-
-    }
-
-  }
-  row_sums_squared = function(x) {
-
-    if (is.null(dim(x))) {
-
-      return(x^2)
-
-    } else {
-
-      return(rowSums(x^2))
-
-    }
-
-  }
-
-  if (is.matrix(y_data)) {
-
-    n = dim(y_data)[1]
-
-  } else {
-
-    n = length(y_data)
-
-  }
+  n = dim(y_data)[1]
 
   if (!all(g_vec > 0 & g_vec < 1)) stop("All elements of g_vec must be between 0 and 1.")
 
@@ -119,13 +91,13 @@ mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = s
 
   nn = RANN::nn2(xz_data,k = 2)
   index = nn$nn.idx[,2]
-  y_prime = get_index(y_data,index)
+  y_prime = y_data[index,,drop = FALSE]
 
-  k_y_data = get_index(y_data,s1)-get_index(y_data,s2)
-  y_spatial_sign = k_y_data/sqrt(row_sums_squared(k_y_data))
+  k_y_data = y_data[s1,,drop = FALSE]-y_data[s2,,drop = FALSE]
+  y_spatial_sign = k_y_data/sqrt(rowSums(k_y_data^2))
 
-  k_y_prime = get_index(y_prime,s1)-get_index(y_prime,s2)
-  y_prime_spatial_sign = k_y_prime/sqrt(row_sums_squared(k_y_prime))
+  k_y_prime = y_prime[s1,,drop = FALSE]-y_prime[s2,,drop = FALSE]
+  y_prime_spatial_sign = k_y_prime/sqrt(rowSums(k_y_prime^2))
   y_prime_spatial_sign[is.na(y_prime_spatial_sign)] = 0
 
   T_est_xz = sum(y_spatial_sign*y_prime_spatial_sign)/n_choose
@@ -140,13 +112,13 @@ mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = s
 
     nn = RANN::nn2(z_data,k = 2)
     index = nn$nn.idx[,2]
-    y_prime = get_index(y_data,index)
+    y_prime = y_data[index,,drop = FALSE]
 
-    k_y_data = get_index(y_data,s1)-get_index(y_data,s2)
-    y_spatial_sign = k_y_data/sqrt(row_sums_squared(k_y_data))
+    k_y_data = y_data[s1,,drop = FALSE]-y_data[s2,,drop = FALSE]
+    y_spatial_sign = k_y_data/sqrt(rowSums(k_y_data^2))
 
-    k_y_prime = get_index(y_prime,s1)-get_index(y_prime,s2)
-    y_prime_spatial_sign = k_y_prime/sqrt(row_sums_squared(k_y_prime))
+    k_y_prime = y_prime[s1,,drop = FALSE]-y_prime[s2,,drop = FALSE]
+    y_prime_spatial_sign = k_y_prime/sqrt(rowSums(k_y_prime^2))
     y_prime_spatial_sign[is.na(y_prime_spatial_sign)] = 0
 
     T_est_z = sum(y_spatial_sign*y_prime_spatial_sign)/n_choose
@@ -181,9 +153,9 @@ mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = s
 
         boot = sample(1:n,m)
 
-        x_boot = get_index(x_data,boot)
-        y_boot = get_index(y_data,boot)
-        z_boot = get_index(z_data,boot)
+        y_boot = y_data[boot,,drop = FALSE]
+        x_boot = x_data[boot,,drop = FALSE]
+        z_boot = z_data[boot,,drop = FALSE]
 
         xz_boot = cbind(x_boot,z_boot)
 
@@ -191,13 +163,13 @@ mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = s
 
         nn = RANN::nn2(xz_boot,k = 2)
         index_boot = nn$nn.idx[,2]
-        y_pboot = get_index(y_boot,index_boot)
+        y_pboot = y_boot[index_boot,,drop = FALSE]
 
-        k_y_boot = get_index(y_boot,s1_m)-get_index(y_boot,s2_m)
-        y_boot_spatial_sign = k_y_boot/sqrt(row_sums_squared(k_y_boot))
+        k_y_boot = y_boot[s1_m,,drop = FALSE]-y_boot[s2_m,,drop = FALSE]
+        y_boot_spatial_sign = k_y_boot/sqrt(rowSums(k_y_boot^2))
 
-        k_y_pboot = get_index(y_pboot,s1_m)-get_index(y_pboot,s2_m)
-        y_pboot_spatial_sign = k_y_pboot/sqrt(row_sums_squared(k_y_pboot))
+        k_y_pboot = y_pboot[s1_m,,drop = FALSE]-y_pboot[s2_m,,drop = FALSE]
+        y_pboot_spatial_sign = k_y_pboot/sqrt(rowSums(k_y_pboot^2))
         y_pboot_spatial_sign[is.na(y_pboot_spatial_sign)] = 0
 
         T_est_xz_matrix[b,i] = sum(y_boot_spatial_sign*y_pboot_spatial_sign)/m_choose
@@ -212,13 +184,13 @@ mram = function(y_data,x_data,z_data = NULL,bootstrap = FALSE,B = 1000,g_vec = s
 
           nn = RANN::nn2(z_boot,k = 2)
           index_boot = nn$nn.idx[,2]
-          y_pboot = get_index(y_boot,index_boot)
+          y_pboot = y_boot[index_boot,,drop = FALSE]
 
-          k_y_boot = get_index(y_boot,s1_m)-get_index(y_boot,s2_m)
-          y_boot_spatial_sign = k_y_boot/sqrt(row_sums_squared(k_y_boot))
+          k_y_boot = y_boot[s1_m,,drop = FALSE]-y_boot[s2_m,,drop = FALSE]
+          y_boot_spatial_sign = k_y_boot/sqrt(rowSums(k_y_boot^2))
 
-          k_y_pboot = get_index(y_pboot,s1_m)-get_index(y_pboot,s2_m)
-          y_pboot_spatial_sign = k_y_pboot/sqrt(row_sums_squared(k_y_pboot))
+          k_y_pboot = y_pboot[s1_m,,drop = FALSE]-y_pboot[s2_m,,drop = FALSE]
+          y_pboot_spatial_sign = k_y_pboot/sqrt(rowSums(k_y_pboot^2))
           y_pboot_spatial_sign[is.na(y_pboot_spatial_sign)] = 0
 
           T_est_z_matrix[b,i] = sum(y_boot_spatial_sign*y_pboot_spatial_sign)/m_choose

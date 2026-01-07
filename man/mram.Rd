@@ -79,7 +79,7 @@ mram(y_data,x_data[,2],bootstrap = TRUE)
 \references{
 Dette and Kroll (2024) A Simple Bootstrap for Chatterjee’s Rank Correlation, Biometrika, asae045.
 
-Shih and Chen (2025) Measuring multivariate regression association via spatial sign (in revision, Computational Statistics & Data Analysis)
+Shih and Chen (2026) Measuring multivariate regression association via spatial sign, Computational Statistics & Data Analysis, 215, 108288.
 }
 \seealso{
 \code{\link{vs_mram}}
